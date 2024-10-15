@@ -1,0 +1,16 @@
+br\com\fiap\smartcity\controller\ctVeinfocoleta.class
+br\com\fiap\smartcity\repository\rpCaminhao.class
+br\com\fiap\smartcity\controller\ctCaminhao.class
+br\com\fiap\smartcity\repository\rpPontocoleta.class
+br\com\fiap\smartcity\model\Pontocoleta.class
+br\com\fiap\smartcity\controller\ctVecaminhao.class
+br\com\fiap\smartcity\SmartcityApplication.class
+br\com\fiap\smartcity\controller\ctColeta.class
+br\com\fiap\smartcity\service\seCaminhao.class
+br\com\fiap\smartcity\model\Coleta.class
+br\com\fiap\smartcity\service\seColeta.class
+br\com\fiap\smartcity\model\Caminhao.class
+br\com\fiap\smartcity\repository\rpColeta.class
+br\com\fiap\smartcity\service\sePontocoleta.class
+br\com\fiap\smartcity\controller\ctPontocoleta.class
+br\com\fiap\smartcity\controller\ctVeagendamento.class
