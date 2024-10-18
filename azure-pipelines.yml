@@ -1,5 +1,5 @@
-# Docker
-# Build a Docker image
+# Docker Pipeline com Estágio de Staging
+# Build e Teste Docker Image
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
@@ -12,46 +12,60 @@ variables:
   tag: '$(Build.BuildId)'
 
 stages:
+# 1º Estágio: Build da Imagem Docker
 - stage: Build
-  displayName: Build image
+  displayName: Build Docker Image
   jobs:
   - job: Build
-    displayName: Build Docker image
+    displayName: Build Docker Image Job
     pool:
       vmImage: ubuntu-latest
     steps:
     - task: Docker@2
-      displayName: Build an image
+      displayName: Build Docker Image
       inputs:
         command: build
         dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
         tags: |
           $(tag)
 
+# 2º Estágio: Staging para Testes
 - stage: Staging
-  displayName: Deploy to Staging
-  dependsOn: Build
-  condition: succeeded()
+  displayName: Staging e Testes
+  dependsOn: Build  # Esse estágio depende do build
   jobs:
-  - job: Deploy
-    displayName: Deploy to Staging environment
+  - job: Test
+    displayName: Teste a Imagem no Staging
     pool:
       vmImage: ubuntu-latest
     steps:
-   
+    # Primeiro, vamos fazer o pull da imagem que acabamos de construir no estágio anterior
     - task: Docker@2
-      displayName: Login to Docker Hub
+      displayName: Pull Docker Image para Teste
       inputs:
-        command: login
-        containerRegistry: 'DockerHubConnection'
-
-    
-    - task: Docker@2
-      displayName: Push image to Docker Hub
-      inputs:
-        command: push
+        command: pull
+        repository: '$(Build.Repository.Name)'
         tags: |
           $(tag)
+    
+    # Em seguida, rodamos a imagem para o ambiente de staging
+    - task: Docker@2
+      displayName: Rodar a Imagem no Container de Staging
+      inputs:
+        command: run
+        imageName: '$(Build.Repository.Name):$(tag)'
+        detached: true  # Rodar em background
+
+    # Agora, executamos os testes no container rodando
     - script: |
-        docker run -d --name my-app-staging -p 8080:80 my-app:$(tag)
-      displayName: Run container in Staging
+        echo "Rodando Testes no Staging..."
+        # Aqui você pode rodar testes específicos, como testes de integração ou aplicação
+        docker exec <nome-do-container> /bin/sh -c "npm test"
+      displayName: Executar Testes no Container
+
+    # Após os testes, podemos parar e remover o container
+    - task: Docker@2
+      displayName: Parar e Remover o Container de Staging
+      inputs:
+        command: stop
+        containers: $(tag)
